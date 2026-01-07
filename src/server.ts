@@ -1,9 +1,14 @@
-import express, { Request, Response } from "express";
+import path from "path";
 import dotenv from "dotenv";
+dotenv.config({
+    path: path.resolve(process.cwd(), ".env"),
+});
+
+
+import express, { Request, Response } from "express";
 import cors from "cors";
 import playerRoutes from "./routes/playerRoutes"
 
-dotenv.config();
 
 const app = express();
 export const PORT = Number(process.env.PORT) || 3001;
@@ -14,8 +19,13 @@ app.use(cors({
 app.use(express.json());
 
 
+console.log(`MY SERVER: ${process.env.AWS_S3_BUCKET_NAME}`)
+
+console.log(`MY PORT ${process.env.PORT}`)
+
+
 // Routes
-app.use("/player", playerRoutes);
+app.use("/api", playerRoutes);
 
 app.get("/", (req: Request, res: Response) => {
     res.json({ message: "Backend is running :D" });
