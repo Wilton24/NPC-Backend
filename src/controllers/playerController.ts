@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
-import { Player } from "../models/player"
+import { Player } from "../models/player";
+// import {playerImg1} from "../../data/images/playerImg1.jpg";
 
 
 const players: Player[] = [
-    { id: 1, name: "Alice", age: 25, points: 4124 },
-    { id: 2, name: "Bob", age: 28, points: 3980 },
-    { id: 3, name: "Charlie", age: 22, points: 3850 },
+    { id: 1, image: "../../data/images/playerImg1.jpg", name: "Alfpiu", age: 34, points: 4124 },
+
 ];
 
 export const getAllPlayers = (_req: Request, res: Response) => {

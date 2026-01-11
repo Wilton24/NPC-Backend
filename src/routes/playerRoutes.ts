@@ -13,7 +13,7 @@ router.get("/", async (_req, res) => {
             name: "John Doe",
             age: 25,
             points: 4124,
-            imageKey: "players/player-1.jpg",
+            imageKey: "playerImg1.jpg",
         },
     ];
 
