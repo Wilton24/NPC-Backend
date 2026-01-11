@@ -31,6 +31,11 @@ app.get("/", (req: Request, res: Response) => {
     res.json({ message: "Backend is running :D" });
 });
 
+
+// DUMMY DATA for testing
+app.use("/images", express.static(path.join(__dirname, "../data/images")));
+
+
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
