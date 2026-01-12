@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { Player } from "../models/player";
-// import {playerImg1} from "../../data/images/playerImg1.jpg";
-
+import { pool } from "../config/db";
 
 const players: Player[] = [
     { id: 1, image: `http://localhost:3001/images/playerImg1.jpg`, name: "Alfpiu", age: 34, points: 4124 },
@@ -14,3 +13,18 @@ const players: Player[] = [
 export const getAllPlayers = (_req: Request, res: Response) => {
     res.json(players);
 };
+
+
+export const getPlayerById = async (req: Request, res: Response) => {
+    const playerId = parseInt(req.params.id, 10);
+
+    try {
+        const result = await pool.query("SELECT * FROM players WHERE id = $1", [playerId]);
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: "Player not found" });
+        }
+        res.json(result.rows[0]);
+    } catch (error) {
+        res.status(500).json({ message: "Server error" });
+    }
+}
