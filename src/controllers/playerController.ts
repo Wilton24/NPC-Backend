@@ -7,11 +7,22 @@ const players: Player[] = [
     { id: 2, image: `http://localhost:3001/images/playerImg2.jpg`, name: "RonnSkie", age: 27, points: 4012 },
     { id: 3, image: `http://localhost:3001/images/playerImg3.jpg`, name: "Jay Rome", age: 39, points: 3782 },
     { id: 4, image: `http://localhost:3001/images/playerImg4.jpg`, name: "Acrhie Voxx", age: 42, points: 2836 },
-
 ];
 
 export const getAllPlayers = (_req: Request, res: Response) => {
-    res.json(players);
+    try {
+        if (!players) {
+            throw new Error("Players data not found");
+        }
+
+        res.status(200).json(players);
+    } catch (error) {
+        console.error("Error fetching players:", error);
+        res.status(500).json({
+            message: "Failed to fetch players",
+            error: (error as Error).message
+        });
+    }
 };
 
 
