@@ -26,16 +26,43 @@ export const getAllPlayers = (_req: Request, res: Response) => {
 };
 
 
-export const getPlayerById = async (req: Request, res: Response) => {
-    const playerId = parseInt(req.params.id, 10);
 
+
+export const getPlayerById = (req: Request, res: Response) => {
     try {
-        const result = await pool.query("SELECT * FROM players WHERE id = $1", [playerId]);
-        if (result.rows.length === 0) {
+        const playerId = parseInt(req.params.id, 10);
+
+        if (isNaN(playerId)) {
+            return res.status(400).json({ message: "Invalid player ID" });
+        }
+
+        const player = players.find(p => p.id === playerId);
+
+        if (!player) {
             return res.status(404).json({ message: "Player not found" });
         }
-        res.json(result.rows[0]);
+
+        res.status(200).json(player);
     } catch (error) {
-        res.status(500).json({ message: "Server error" });
+        console.error("Error fetching player:", error);
+        res.status(500).json({
+            message: "Failed to fetch player",
+            error: (error as Error).message
+        });
     }
-}
+};
+
+
+// export const getPlayerById = async (req: Request, res: Response) => {
+//     const playerId = parseInt(req.params.id, 10);
+
+//     try {
+//         const result = await pool.query("SELECT * FROM players WHERE id = $1", [playerId]);
+//         if (result.rows.length === 0) {
+//             return res.status(404).json({ message: "Player not found" });
+//         }
+//         res.json(result.rows[0]);
+//     } catch (error) {
+//         res.status(500).json({ message: "Server error" });
+//     }
+// }

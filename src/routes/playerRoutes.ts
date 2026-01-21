@@ -10,7 +10,7 @@ router.get("/players", getAllPlayers);
 
 
 router.get("/players/:id", async (req: Request, res: Response) => {
-    await getPlayerById(req, res);
+    getPlayerById(req, res);
 });
 
 
