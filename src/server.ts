@@ -13,14 +13,8 @@ export const PORT = Number(process.env.PORT) || 3001;
 app.use(cors({
     origin: "http://localhost:5173"
 }));
+
 app.use(express.json());
-
-
-console.log(`MY SERVER: ${process.env.AWS_S3_BUCKET_NAME}`)
-
-console.log(`MY PORT ${process.env.PORT}`)
-
-
 app.use("/api/auth", authRoutes);
 
 
