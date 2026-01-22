@@ -1,14 +1,11 @@
 import path from "path";
 import dotenv from "dotenv";
-dotenv.config({
-    path: path.resolve(process.cwd(), ".env"),
-});
-
-
 import express, { Request, Response } from "express";
 import cors from "cors";
 import playerRoutes from "./routes/playerRoutes"
+import authRoutes from "./routes/authRoutes";
 
+dotenv.config();
 
 const app = express();
 export const PORT = Number(process.env.PORT) || 3001;
@@ -22,6 +19,9 @@ app.use(express.json());
 console.log(`MY SERVER: ${process.env.AWS_S3_BUCKET_NAME}`)
 
 console.log(`MY PORT ${process.env.PORT}`)
+
+
+app.use("/api/auth", authRoutes);
 
 
 // Routes
