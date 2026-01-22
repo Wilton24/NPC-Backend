@@ -3,15 +3,10 @@ import { hashPassword } from "../utils/hash";
 import { User } from "../models/User";
 import { comparePassword } from "../utils/hash";
 import { generateToken } from "../utils/jwt";
+import { pool } from "../config/db";
 
-
-let users: User[] = [];
-let userIdCounter = 1;
-
-console.log("USERS:", users);
 
 export const register = async (req: Request, res: Response) => {
-
     try {
         const { email, password } = req.body;
 
@@ -19,38 +14,36 @@ export const register = async (req: Request, res: Response) => {
             return res.status(400).json({ message: "Email and password required" });
         }
 
-        const existingUser = users.find((u) => u.email === email);
-        if (existingUser) {
+        // Check if user exists
+        const existingUser = await pool.query(
+            "SELECT id FROM users WHERE email = $1",
+            [email]
+        );
+
+        if (existingUser.rows.length > 0) {
             return res.status(409).json({ message: "User already exists" });
         }
 
         const hashedPassword = await hashPassword(password);
 
-        const newUser: User = {
-            id: userIdCounter++,
-            email,
-            password: hashedPassword,
-            createdAt: new Date(),
-        };
-
-        users.push(newUser);
+        // Insert user
+        const result = await pool.query(
+            `INSERT INTO users (email, password)
+             VALUES ($1, $2)
+             RETURNING id, email`,
+            [email, hashedPassword]
+        );
 
         res.status(201).json({
             message: "User registered successfully",
-            user: {
-                id: newUser.id,
-                email: newUser.email,
-            },
+            user: result.rows[0],
         });
     } catch (error) {
         console.error("Register error:", error);
         res.status(500).json({ message: "Server error" });
     }
-
-    // Temporary response for testing
-    // const { email, password } = req.body;
-    // res.status(200).json({ emalens: email, passwordens: password });
 };
+
 
 export const login = async (req: Request, res: Response) => {
     try {
@@ -60,10 +53,16 @@ export const login = async (req: Request, res: Response) => {
             return res.status(400).json({ message: "Email and password required" });
         }
 
-        const user = users.find((u) => u.email === email);
-        if (!user) {
+        const result = await pool.query(
+            "SELECT id, email, password FROM users WHERE email = $1",
+            [email]
+        );
+
+        if (result.rows.length === 0) {
             return res.status(401).json({ message: "Invalid credentials" });
         }
+
+        const user = result.rows[0];
 
         const isMatch = await comparePassword(password, user.password);
         if (!isMatch) {
@@ -88,3 +87,4 @@ export const login = async (req: Request, res: Response) => {
         res.status(500).json({ message: "Server error" });
     }
 };
+
