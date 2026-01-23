@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { hashPassword } from "../utils/hash";
-import { User } from "../models/User";
 import { comparePassword } from "../utils/hash";
 import { generateToken } from "../utils/jwt";
 import { pool } from "../config/db";
