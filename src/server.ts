@@ -26,7 +26,8 @@ app.get("/", (req: Request, res: Response) => {
 
 
 // DUMMY DATA for testing
-app.use("/images", express.static(path.join(__dirname, "../data/images")));
+// app.use("/images", express.static(path.join(__dirname, "../data/images")));
+app.use("/images", express.static(path.join(process.cwd(), "data/images")))
 
 
 app.listen(PORT, () => {
