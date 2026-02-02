@@ -1,25 +1,15 @@
 import { Request, Response } from "express";
-import { Player } from "../models/player";
 import { pool } from "../config/db";
 
-const players: Player[] = [
-    { id: 1, image: `http://localhost:5000/images/playerImg1.jpg`, name: "Alfpiu", age: 34, points: 4124 },
-    { id: 2, image: `http://localhost:5000/images/playerImg2.jpg`, name: "RonnSkie", age: 27, points: 4012 },
-    { id: 3, image: `http://localhost:5000/images/playerImg3.jpg`, name: "Jay Rome", age: 39, points: 3782 },
-    { id: 4, image: `http://localhost:5000/images/playerImg4.jpg`, name: "Acrhie Voxx", age: 42, points: 2836 },
-];
 
+const S3_BASE_URL = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com`
 
 export const getAllPlayers = async (_req: Request, res: Response) => {
     try {
-        // Query the actual database
         const result = await pool.query("SELECT * FROM players ORDER BY points DESC");
-
-        // We add the domain prefix here so the frontend knows where to look
         const playersWithImages = result.rows.map(player => ({
             ...player,
-            image: `http://localhost:5000/images/${player.image_filename}`,
-            test: "value came from db"
+            image: `${S3_BASE_URL}/${player.image_key || player.image_filename}`,
         }));
 
         res.status(200).json(playersWithImages);
@@ -29,46 +19,27 @@ export const getAllPlayers = async (_req: Request, res: Response) => {
 };
 
 
-
-// export const getAllPlayers = (_req: Request, res: Response) => {
-//     try {
-//         if (!players) {
-//             throw new Error("Players data not found");
-//         }
-
-//         res.status(200).json(players);
-//     } catch (error) {
-//         console.error("Error fetching players:", error);
-//         res.status(500).json({
-//             message: "Failed to fetch players",
-//             error: (error as Error).message
-//         });
-//     }
-// };
-
-
-
-
-export const getPlayerById = (req: Request, res: Response) => {
+export const getPlayerById = async (req: Request, res: Response) => {
     try {
         const playerId = parseInt(req.params.id, 10);
-
         if (isNaN(playerId)) {
             return res.status(400).json({ message: "Invalid player ID" });
         }
 
-        const player = players.find(p => p.id === playerId);
+        const result = await pool.query("SELECT * FROM players WHERE id = $1", [playerId]);
 
-        if (!player) {
+        if (result.rows.length === 0) {
             return res.status(404).json({ message: "Player not found" });
         }
 
-        res.status(200).json(player);
+        const player = result.rows[0];
+
+        res.status(200).json({
+            ...player,
+            image: `${S3_BASE_URL}/${player.image_key || player.image_filename}`
+        });
     } catch (error) {
         console.error("Error fetching player:", error);
-        res.status(500).json({
-            message: "Failed to fetch player",
-            error: (error as Error).message
-        });
+        res.status(500).json({ message: "Database error", error });
     }
 };
